@@ -8,12 +8,13 @@ class boid{
   
   int maxSpeed = 10;
   int minSpeed = 2;
-  float acc = random(0,0.001);
+  float acc = random(0.0001,0.001);
   
   int tHeight = 20;
   int tWidth = 10;
   
-  int viewRadius = 50;
+  int viewRadius = 100;
+  float viewAngle = 3 * PI/2;
   
   ArrayList<boid> neighbours;
   
@@ -21,8 +22,9 @@ class boid{
   //constructors
   public boid(){
     this.pos = new PVector(0,0);
-    this.velocity = new PVector(0,0); // assign 0 velocity
-    this.acceleration = new PVector(random(-0.01,0.01),random(-0.01,0.01)); //assign random acceleration
+    this.velocity = new PVector(0,0); // assigns random velocity
+    this.acceleration = PVector.random2D(); //unit vector with random direction
+    this.acceleration.setMag( acc ) ;
   }
   
   public boid(PVector pos){
@@ -46,17 +48,30 @@ class boid{
     triangle( 0, -this.tHeight/2,
               this.tWidth/2,  int(this.tHeight)/2,
              -this.tWidth/2,  int(this.tHeight)/2
-            );       
+            );
+    if (this.highlight){
+      fill(255,0,0,50);
+      float notVisibleAngle = 2 * PI - this.viewAngle;
+      arc (0 ,0, this.viewRadius*2, this.viewRadius*2, notVisibleAngle/2 + PI/2, notVisibleAngle/2 + this.viewAngle +PI/2, PIE); // show view Area   
+    }        
     popMatrix();
     
     if (this.highlight){
-      fill(255,0,0,50);
-      ellipse(this.pos.x ,this.pos.y + this.tHeight/2, this.viewRadius*2, this.viewRadius*2);
-      
       showNeighbours();
     }
     
   }
+  
+  void showNeighbours(){
+    if (this.neighbours.size() > 0){ 
+      stroke(255,0,0);
+      for (boid neighbour : this.neighbours){
+        line(this.pos.x,this.pos.y + this.tHeight/2,
+             neighbour.pos.x, neighbour.pos.y + neighbour.tHeight/2);
+      }     
+    }
+  }
+  
   
   
   private int checkOutofBound(){ // check if the boid has reached the edge
@@ -104,28 +119,15 @@ class boid{
   
   //get neighbours within certain radius
   void getNeighbours(ArrayList<boid> flock){
-    this.neighbours = new ArrayList<boid> ();
-    
+    this.neighbours = new ArrayList<boid> (); 
     for (boid b : flock){
-      if (b!= this && PVector.dist(b.pos,this.pos) < this.viewRadius){
+      //if (b!= this && PVector.dist(b.pos,this.pos) < this.viewRadius){
+      //  this.neighbours.add(b);
+      PVector displacement = PVector.sub(this.pos,b.pos);
+      if (displacement.mag() <this.viewRadius && PVector.angleBetween( this.velocity, PVector.mult(displacement,-1) )  <=  this.viewAngle/2){
         this.neighbours.add(b);
       }
     }
-  }
-  
-  void showNeighbours(){
-    if (this.neighbours.size() > 0){
-  
-      stroke(255,0,0);
-      for (boid neighbour : this.neighbours){
-        line(this.pos.x,this.pos.y + this.tHeight/2,
-             neighbour.pos.x, neighbour.pos.y + neighbour.tHeight/2);
-      }
-      
-    }
-    
-    
-    
   }
   
   

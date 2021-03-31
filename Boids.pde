@@ -8,7 +8,7 @@ void setup(){
   background(55);
   
   boidArray = new ArrayList<boid>();
-  int numBoids = 100;
+  int numBoids = 100s;
   
   for (int i=0; i <numBoids; i++){
     boidArray.add(new boid(new PVector(width/2,height/2) ));
