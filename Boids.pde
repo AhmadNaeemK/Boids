@@ -14,6 +14,8 @@ void setup(){
     boidArray.add(new boid(new PVector(width/2,height/2) ));
   }
   
+  boidArray.get(0).highlight = true;
+  
   
   
 }
