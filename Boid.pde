@@ -8,10 +8,15 @@ class boid{
   
   int maxSpeed = 10;
   int minSpeed = 2;
-  float acc = random(0,0.01);
+  float acc = random(0,0.001);
   
   int tHeight = 20;
   int tWidth = 10;
+  
+  int viewRadius = 50;
+  
+  ArrayList<boid> neighbours;
+  
   
   //constructors
   public boid(){
@@ -45,9 +50,12 @@ class boid{
     popMatrix();
     
     if (this.highlight){
-      fill(255,0,0,100);
-      ellipse(this.pos.x ,this.pos.y + this.tHeight/2, this.tHeight, this.tHeight);
+      fill(255,0,0,50);
+      ellipse(this.pos.x ,this.pos.y + this.tHeight/2, this.viewRadius*2, this.viewRadius*2);
+      
+      showNeighbours();
     }
+    
   }
   
   
@@ -94,12 +102,36 @@ class boid{
     }
   }
   
+  //get neighbours within certain radius
+  void getNeighbours(ArrayList<boid> flock){
+    this.neighbours = new ArrayList<boid> ();
+    
+    for (boid b : flock){
+      if (b!= this && PVector.dist(b.pos,this.pos) < this.viewRadius){
+        this.neighbours.add(b);
+      }
+    }
+  }
+  
+  void showNeighbours(){
+    if (this.neighbours.size() > 0){
+  
+      stroke(255,0,0);
+      for (boid neighbour : this.neighbours){
+        line(this.pos.x,this.pos.y + this.tHeight/2,
+             neighbour.pos.x, neighbour.pos.y + neighbour.tHeight/2);
+      }
+      
+    }
+    
+    
+    
+  }
+  
   
   void update(){
-  
     this.pos.add(this.velocity);
     this.accelerate();
     this.onOutofBound();
-    
   }
 }
