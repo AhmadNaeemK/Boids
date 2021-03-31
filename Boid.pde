@@ -6,9 +6,9 @@ class boid{
   
   boolean highlight = false;
   
-  int maxSpeed = 10;
+  int maxSpeed = 5;
   int minSpeed = 2;
-  float acc = random(0.0001,0.001);
+  float acc = 0.1;
   
   int tHeight = 20;
   int tWidth = 10;
@@ -22,21 +22,22 @@ class boid{
   //constructors
   public boid(){
     this.pos = new PVector(0,0);
-    this.velocity = new PVector(0,0); // assigns random velocity
-    this.acceleration = PVector.random2D(); //unit vector with random direction
-    this.acceleration.setMag( acc ) ;
+    this.velocity = PVector.random2D(); // assigns random velocity
+    this.velocity.setMag(0.01);
+    this.acceleration = PVector.random2D();
+    this.acceleration.setMag(acc);
   }
   
   public boid(PVector pos){
     this.pos = pos;
-    this.velocity = new PVector(0,0); // assigns random velocity
-    this.acceleration = PVector.random2D(); //unit vector with random direction
-    this.acceleration.setMag( acc ) ;
+    this.velocity = PVector.random2D(); // assigns random velocity
+    this.velocity.setMag(0.01);
+    this.acceleration = PVector.random2D();
+    this.acceleration.setMag(acc);
   }
   
   //function to render
   void show(){
-    ellipseMode(CENTER);
     float angle = this.velocity.heading() + PI/2;
    
     pushMatrix();
@@ -110,29 +111,39 @@ class boid{
   }
   
   private void accelerate(){
-    if (this.velocity.mag() < maxSpeed){
       this.velocity.add(this.acceleration);
-      this.acceleration = new PVector(this.velocity.x, this.velocity.y); //copy velocity
-      this.acceleration.setMag(acc);
-    }
+      this.velocity.limit(maxSpeed);
+      //this.acceleration = new PVector(this.velocity.x, this.velocity.y); //copy velocity
+      //this.acceleration.setMag(acc);
   }
   
   //get neighbours within certain radius
   void getNeighbours(ArrayList<boid> flock){
     this.neighbours = new ArrayList<boid> (); 
     for (boid b : flock){
-      //if (b!= this && PVector.dist(b.pos,this.pos) < this.viewRadius){
-      //  this.neighbours.add(b);
       PVector displacement = PVector.sub(this.pos,b.pos);
-      if (displacement.mag() <this.viewRadius && PVector.angleBetween( this.velocity, PVector.mult(displacement,-1) )  <=  this.viewAngle/2){
+      if (b!= this && displacement.mag() <this.viewRadius && PVector.angleBetween( this.velocity, PVector.mult(displacement,-1) )  <=  this.viewAngle/2){
         this.neighbours.add(b);
       }
     }
   }
   
-  
+  //boid movement
+  void alignment(){
+    if (this.neighbours.size() > 0){
+      PVector average = new PVector(0,0);
+      for (boid b : this.neighbours){
+        average.add(b.pos);
+      }
+      average = average.div(this.neighbours.size());
+      this.acceleration.add(PVector.sub(average,pos));
+      this.acceleration.limit(acc);
+    } else return;
+  }
+
   void update(){
     this.pos.add(this.velocity);
+    //this.alignment();
     this.accelerate();
     this.onOutofBound();
   }
