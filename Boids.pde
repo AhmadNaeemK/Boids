@@ -8,10 +8,10 @@ void setup(){
   background(55);
   
   boidArray = new ArrayList<boid>();
-  int numBoids = 300;
+  int numBoids = 2000;
   
   for (int i=0; i <numBoids; i++){
-    boidArray.add(new boid(new PVector(random(width),random(height/2))));
+    boidArray.add(new boid(new PVector(random(width),random(height))));
   }
   
   boidArray.get(0).highlight = true;

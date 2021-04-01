@@ -6,17 +6,17 @@ class boid{
   
   boolean highlight = false;
   
-  int maxSpeed = 4;
-  float acc = 0.1;
+  float maxSpeed = 1;
+  float acc = 0.05;
   
-  int tHeight = 20;
-  int tWidth = 10;
+  int tHeight = 5;
+  int tWidth = 2;
   
-  int viewRadius = 80;
+  int viewRadius = 20;
 
   float viewAngle = 3 * PI/2;
   
-  int collisionRadius = 30;
+  int collisionRadius = 10;
   
   ArrayList<boid> neighbours;
   
@@ -76,40 +76,14 @@ class boid{
   
   
   
-  private int checkOutofBound(){ // check if the boid has reached the edge
+  private void checkOutofBound(){ // check if the boid has reached the edge
+    if (this.pos.x < 0) this.pos.x = width;
+    else if (this.pos.x > width) this.pos.x = 0;
     
-    int temp = 0;
-    if (this.pos.x < 0 || this.pos.x> width){
-      temp = 1;
-    } else if (this.pos.y < 0 || this.pos.y > height){
-      temp = 2;
-    }
-    
-    if ( (this.pos.x < 0 || this.pos.x> width) && (this.pos.y < 0 || this.pos.y > height)){
-      temp = 3;
-    }
-   
-    return temp;
+    if (this.pos.y < 0) this.pos.y = height;
+    else if (this.pos.y > height) this.pos.y = 0;
   }
-  
-  private void onOutofBound(){
-    int temp = this.checkOutofBound();
-    
-    switch (temp){
-      case 0:
-        return;
-      case 1:
-        this.velocity.x *= -1;
-        return;
-      case 2:
-        this.velocity.y *= -1;
-        return;
-      case 3:
-        this.velocity.mult(-1);
-        return;
-    }
-    
-  }
+ 
   
   //get neighbours within certain radius
   void getNeighbours(ArrayList<boid> flock){
@@ -172,6 +146,6 @@ class boid{
     this.alignment();
     this.cohesion();
     this.seperation();
-    this.onOutofBound();
+    this.checkOutofBound();
   }
 }
