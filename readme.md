@@ -1,4 +1,4 @@
-In 1986 Craign Reynolds coined the term boids. He defined the as generic simulated flocking creatures.
+In 1986 Craig Reynolds coined the term boids. He defined the as generic simulated flocking creatures.
 The boids move according to three rules i.e.
 
 1. Separation: steer to avoid crowding local flockmates
