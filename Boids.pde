@@ -8,7 +8,7 @@ void setup(){
   background(55);
   
   boidArray = new ArrayList<boid>();
-  int numBoids = 10;
+  int numBoids = 300;
   
   for (int i=0; i <numBoids; i++){
     boidArray.add(new boid(new PVector(random(width),random(height/2))));
@@ -25,6 +25,9 @@ void draw(){
   
   for (boid i: boidArray){
     i.getNeighbours(boidArray);
+  }
+  
+  for (boid i: boidArray){
     i.update();
     i.show();
   }

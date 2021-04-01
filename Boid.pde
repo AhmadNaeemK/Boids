@@ -6,15 +6,17 @@ class boid{
   
   boolean highlight = false;
   
-  int maxSpeed = 5;
-  int minSpeed = 2;
+  int maxSpeed = 4;
   float acc = 0.1;
   
   int tHeight = 20;
   int tWidth = 10;
   
-  int viewRadius = 100;
+  int viewRadius = 80;
+
   float viewAngle = 3 * PI/2;
+  
+  int collisionRadius = 30;
   
   ArrayList<boid> neighbours;
   
@@ -24,8 +26,7 @@ class boid{
     this.pos = new PVector(0,0);
     this.velocity = PVector.random2D(); // assigns random velocity
     this.velocity.setMag(0.01);
-    this.acceleration = PVector.random2D();
-    this.acceleration.setMag(acc);
+    this.acceleration = new PVector(0,0);
   }
   
   public boid(PVector pos){
@@ -110,26 +111,31 @@ class boid{
     
   }
   
-  private void accelerate(){
-      this.velocity.add(this.acceleration);
-      this.velocity.limit(maxSpeed);
-      //this.acceleration = new PVector(this.velocity.x, this.velocity.y); //copy velocity
-      //this.acceleration.setMag(acc);
-  }
-  
   //get neighbours within certain radius
   void getNeighbours(ArrayList<boid> flock){
     this.neighbours = new ArrayList<boid> (); 
     for (boid b : flock){
-      PVector displacement = PVector.sub(this.pos,b.pos);
-      if (b!= this && displacement.mag() <this.viewRadius && PVector.angleBetween( this.velocity, PVector.mult(displacement,-1) )  <=  this.viewAngle/2){
+      PVector displacement = PVector.sub(b.pos,this.pos);
+      if (b!= this && displacement.mag() <this.viewRadius && PVector.angleBetween(this.velocity, displacement)<=  this.viewAngle/2){
         this.neighbours.add(b);
       }
     }
   }
   
   //boid movement
-  void alignment(){
+  void alignment(){ //steer towards the average heading of local flockmates
+    if (this.neighbours.size() > 0){
+      PVector average = new PVector(0,0);
+      for (boid b : this.neighbours){
+        average.add(b.velocity);
+      }
+      average = average.div(this.neighbours.size());
+      this.acceleration.add(PVector.sub(average,velocity));
+      this.acceleration.limit(acc);
+    } else return;
+  }
+  
+  void cohesion(){ //steer to move toward the average position of local flockmates
     if (this.neighbours.size() > 0){
       PVector average = new PVector(0,0);
       for (boid b : this.neighbours){
@@ -140,11 +146,32 @@ class boid{
       this.acceleration.limit(acc);
     } else return;
   }
+  
+  void seperation(){
+    if (this.neighbours.size() > 0){
+       PVector minDisplacement = PVector.sub(this.pos,this.neighbours.get(0).pos);
+       for (int i=1; i < this.neighbours.size(); i++){
+         PVector displacement = PVector.sub(this.pos,this.neighbours.get(i).pos);
+         if (displacement.mag()< minDisplacement.mag()){
+           minDisplacement = displacement;
+         }
+       }
+       
+       if (minDisplacement.mag() < this.collisionRadius){
+          this.acceleration.add(minDisplacement);
+          this.acceleration.limit(acc);
+       } else return;
+      
+    }  
+  }
 
   void update(){
     this.pos.add(this.velocity);
-    //this.alignment();
-    this.accelerate();
+    this.velocity.add(this.acceleration);
+    this.velocity.limit(maxSpeed);
+    this.alignment();
+    this.cohesion();
+    this.seperation();
     this.onOutofBound();
   }
 }
