@@ -8,7 +8,7 @@ void setup(){
   background(55);
   
   boidArray = new ArrayList<boid>();
-  int numBoids = 2000;
+  int numBoids = 5000;
   
   for (int i=0; i <numBoids; i++){
     boidArray.add(new boid(new PVector(random(width),random(height))));
@@ -29,6 +29,6 @@ void draw(){
   
   for (boid i: boidArray){
     i.update();
-    i.show();
+    i.showParticle();
   }
 }

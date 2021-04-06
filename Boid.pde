@@ -7,16 +7,16 @@ class boid{
   boolean highlight = false;
   
   float maxSpeed = 1;
-  float acc = 0.05;
+  float acc = 0.01;
   
-  int tHeight = 5;
-  int tWidth = 2;
+  int tHeight = 20;
+  int tWidth = 10;
   
-  int viewRadius = 20;
+  int viewRadius = 10;
 
   float viewAngle = 3 * PI/2;
   
-  int collisionRadius = 10;
+  float collisionRadius = 6;
   
   ArrayList<boid> neighbours;
   
@@ -62,6 +62,13 @@ class boid{
       showNeighbours();
     }
     
+  }
+  
+  void showParticle(){
+    noStroke();
+    fill(255);
+    ellipseMode(CENTER);
+    ellipse(this.pos.x,this.pos.y,2,2);
   }
   
   void showNeighbours(){
@@ -132,8 +139,10 @@ class boid{
        }
        
        if (minDisplacement.mag() < this.collisionRadius){
-          this.acceleration.add(minDisplacement);
-          this.acceleration.limit(acc);
+           //int dir = floor(random(0,2)) -1;
+           //minDisplacement.rotate(dir * PI/2);
+           this.acceleration.add(minDisplacement);
+           //this.acceleration.limit(acc);
        } else return;
       
     }  
