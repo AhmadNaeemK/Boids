@@ -7,12 +7,15 @@ class boid{
   boolean highlight = false;
   
   float maxSpeed = 1;
-  float acc = 0.01;
+  float acc = 0.05;
   
   int tHeight = 20;
   int tWidth = 10;
   
-  int viewRadius = 10;
+  int tHeight = 2;
+  int tWidth = 1;
+  
+  int viewRadius = tHeight + 10;
 
   float viewAngle = 3 * PI/2;
   
@@ -46,7 +49,7 @@ class boid{
     rotate(angle); // to show the velocity of movement
     
     noStroke();
-    fill(255);
+    fill(0,0,255);
     triangle( 0, -this.tHeight/2,
               this.tWidth/2,  int(this.tHeight)/2,
              -this.tWidth/2,  int(this.tHeight)/2
@@ -66,9 +69,9 @@ class boid{
   
   void showParticle(){
     noStroke();
-    fill(255);
+    fill(0);
     ellipseMode(CENTER);
-    ellipse(this.pos.x,this.pos.y,2,2);
+    ellipse(this.pos.x,this.pos.y,this.tWidth,this.tWidth);
   }
   
   void showNeighbours(){
@@ -91,6 +94,7 @@ class boid{
     else if (this.pos.y > height) this.pos.y = 0;
   }
  
+  //get nearest objects ---------------------------------------------------------------------------------------------
   
   //get neighbours within certain radius
   void getNeighbours(ArrayList<boid> flock){
@@ -103,7 +107,34 @@ class boid{
     }
   }
   
-  //boid movement
+  //get nearest attractor
+  attractor getFoodAttractor(ArrayList<attractor> food){
+    float min_dist = width;
+    attractor min_attractor = null;
+    for (attractor a: food){
+      PVector displacement = PVector.sub(a.pos,this.pos);
+      if (displacement.mag()<min_dist && displacement.mag() <this.viewRadius && PVector.angleBetween(this.velocity, displacement)<=  this.viewAngle/2){
+        min_attractor = a;
+      }
+    }
+    return min_attractor;
+  }
+  
+  //get nearest wall
+  repeller getWallRepeller(ArrayList<repeller> walls){
+    float min_dist = width;
+    repeller min_repeller = null;
+    for (repeller a: walls){
+      PVector displacement = PVector.sub(a.pos,this.pos);
+      if (displacement.mag()<min_dist && displacement.mag() <this.viewRadius && PVector.angleBetween(this.velocity, displacement)<=  this.viewAngle/2){
+        min_repeller = a;
+      }
+    }
+    return min_repeller;
+  }
+  
+  //boid movement--------------------------------------------------------------------------
+  
   void alignment(){ //steer towards the average heading of local flockmates
     if (this.neighbours.size() > 0){
       PVector average = new PVector(0,0);
@@ -146,6 +177,24 @@ class boid{
        } else return;
       
     }  
+  }
+  
+  //steer towards the food source
+  void food_attraction(ArrayList<attractor> food){
+    attractor nFood = getFoodAttractor(food); // nearest food
+    if (nFood != null){
+      this.acceleration.add(PVector.sub(nFood.pos,this.pos));
+      this.acceleration.limit(nFood.attraction);
+    } else return;
+  }
+  
+  //steer away from wall
+  void wall_repulsion(ArrayList<repeller> walls){
+    repeller nWall = getWallRepeller(walls); // nearest Wall
+    if (nWall != null){
+      this.acceleration.add(PVector.sub(this.pos,nWall.pos));
+      this.acceleration.limit(nWall.repulsion);
+    } else return;
   }
 
   void update(){
